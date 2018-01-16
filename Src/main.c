@@ -52,6 +52,8 @@
 #include "fatfs.h"
 
 /* USER CODE BEGIN Includes */
+#define PPGCOLLE_VERSION "180117"
+
 #include <malloc.h>
 #include <string.h>
 
@@ -84,6 +86,8 @@ pIO data[8] = {
 	{ LCD_D4_GPIO_Port, LCD_D4_Pin }, { LCD_D5_GPIO_Port, LCD_D5_Pin },
 	{ LCD_D6_GPIO_Port, LCD_D6_Pin }, { LCD_D7_GPIO_Port, LCD_D7_Pin }
 };
+FATFS fileSystem;
+uint8_t FS_OK = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -166,38 +170,38 @@ int main(void)
 
   	lcd->clear(lcd->p);
 
-  	lcd->printfa(lcd->p, "init sd card...");
-  	char res = sd->init(sd->p);
-  	lcd->printfa(lcd->p, "result: %d\n", res);
+  	lcd->printfa(lcd->p, "PPGCollector Factory System\n");
+	lcd->printfa(lcd->p, "Version: %s\n\n", PPGCOLLE_VERSION);
 
-  	lcd->printfa(lcd->p, "sd card's size: ");
-  	uint32_t size = sd->size(sd->p);
-  	lcd->printfa(lcd->p, "%d x 512 Bytes, %d MB\n", size, size / 2048);
+  	uint8_t result = 0;
+	result = sd->init(sd->p);
+	uint32_t size = sd->size(sd->p);
+	if (result == 0) {
+		lcd->printfa(lcd->p, "init SD card... OK, %d MB\n", size / 2048);
+	} else {
+		lcd->printfa(lcd->p, "init SD card... ERR: %d\n", result);
+	}
 
-  	uint8_t regs[16];
-  	memset(regs, 0, 16);
-  	res = sd->cid(sd->p, regs);
-  	lcd->printfa(lcd->p, "sd card's cid (result is %d):\n", res);
-  	for (uint16_t i = 0; i < 16; i++)
-		lcd->printfa(lcd->p, "%02X ", regs[i]);
-  	lcd->printfa(lcd->p, "\n");
+	result = 0;
+	lcd->printfa(lcd->p, "mount SD card...\n");
+	f_mount(&fileSystem, USERPath, 1);
+	result = f_mount(&fileSystem, USERPath, 1);
+	if(result == FR_OK) {
+		char path[] = "BOARD_INFO.TXT";
+		FIL boardInfo;
+		f_open(&boardInfo, path, FA_WRITE | FA_CREATE_ALWAYS);
+		f_printf(&boardInfo, "PPGCollector with STM32F303\n");
+		f_printf(&boardInfo, "by drzzm32\n");
+		f_printf(&boardInfo, "Firmware version: %s\n", PPGCOLLE_VERSION);
+		f_close(&boardInfo);
+		lcd->printfa(lcd->p, "test SD card... OK\n");
+		FS_OK = 1;
+	} else {
+		lcd->printfa(lcd->p, "test SD card... ERR: %02X\n", result);
+		FS_OK = 0;
+	}
 
-  	memset(regs, 0, 16);
-  	res = sd->csd(sd->p, regs);
-	lcd->printfa(lcd->p, "sd card's csd (result is %d):\n", res);
-	for (uint16_t i = 0; i < 16; i++)
-		lcd->printfa(lcd->p, "%02X ", regs[i]);
-	lcd->printfa(lcd->p, "\n");
-
-  	uint8_t buf[512];
-  	memset(buf, 0, 512);
-  	lcd->printfa(lcd->p, "reading...");
-  	res = sd->read(sd->p, 0, buf);
-  	lcd->printfa(lcd->p, "result: %d\n", res);
-  	lcd->printfa(lcd->p, "sd's data (a sector, 512 bytes):\n", res);
-  	for (uint16_t i = 0; i < 512; i++)
-  		lcd->printfa(lcd->p, "%02X ", buf[i]);
-  	lcd->printfa(lcd->p, "\n\n");
+	lcd->printfa(lcd->p, "\n\n");
 
   	lcd->printfa(lcd->p, "process finished.\n");
   /* USER CODE END 2 */
