@@ -1,0 +1,76 @@
+Removed Pin From Net: NetName=NetC8_1 Pin=P1-1
+Removed Pin From Net: NetName=GND Pin=P1-2
+Removed Pin From Net: NetName=SWDIO Pin=P2-1
+Removed Pin From Net: NetName=GND Pin=P2-3
+Removed Pin From Net: NetName=GND Pin=P3-3
+Change Component Footprint: Designator=SW1 Old Footprint=TSW DIP-3*6*4.3 New Footprint=TSW SMD-3*6*4.3
+Change Component Footprint: Designator=SW2 Old Footprint=TSW DIP-3*6*4.3 New Footprint=TSW SMD-3*6*4.3
+Change Component Footprint: Designator=SW3 Old Footprint=TSW DIP-3*6*4.3 New Footprint=TSW SMD-3*6*4.3
+Change Component Footprint: Designator=SW4 Old Footprint=TSW DIP-3*6*4.3 New Footprint=TSW SMD-3*6*4.3
+Added Pin To Net: NetName=GND Pin=P1-1
+Added Pin To Net: NetName=NetC8_1 Pin=P1-2
+Added Pin To Net: NetName=GND Pin=P2-1
+Added Pin To Net: NetName=SWDIO Pin=P2-3
+Added Pin To Net: NetName=GND Pin=P3-1
+Added Pin To Net: NetName=NetP3_3 Pin=P3-3
+Added Pin To Net: NetName=NetP3_3 Pin=U1-37
+Added Net: Name=NetP3_3
+Added Member To Class: ClassName=PPGColle Member=Component B1
+Added Member To Class: ClassName=PPGColle Member=Component C1 20pF (200) 5% 50V
+Added Member To Class: ClassName=PPGColle Member=Component C2 20pF (200) 5% 50V
+Added Member To Class: ClassName=PPGColle Member=Component C3 12pF (120) 5% 50V
+Added Member To Class: ClassName=PPGColle Member=Component C4 12pF (120) 5% 50V
+Added Member To Class: ClassName=PPGColle Member=Component C5 2.2uF (225) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component C6 2.2uF (225) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component C7 10uF (106) 10% 10V
+Added Member To Class: ClassName=PPGColle Member=Component C8 10uF (106) 10% 10V
+Added Member To Class: ClassName=PPGColle Member=Component C9 100nF (104) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component C10 100nF (104) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component C11 100nF (104) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component C12 10uF (106) 10% 10V
+Added Member To Class: ClassName=PPGColle Member=Component C13 10uF (106) 10% 10V
+Added Member To Class: ClassName=PPGColle Member=Component C14 100nF (104) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component C15 100nF (104) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component C16 100nF (104) 10% 16V
+Added Member To Class: ClassName=PPGColle Member=Component D1 啞腑 0603
+Added Member To Class: ClassName=PPGColle Member=Component D2 懦腑 0603
+Added Member To Class: ClassName=PPGColle Member=Component D3 蟯腑 0603
+Added Member To Class: ClassName=PPGColle Member=Component D4 綻腑 0603
+Added Member To Class: ClassName=PPGColle Member=Component D5 酴腑 0603
+Added Member To Class: ClassName=PPGColle Member=Component D6 懦腑 0603
+Added Member To Class: ClassName=PPGColle Member=Component D7 啞腑 0603
+Added Member To Class: ClassName=PPGColle Member=Component P1 BAT
+Added Member To Class: ClassName=PPGColle Member=Component P2 SWD
+Added Member To Class: ClassName=PPGColle Member=Component P3 USART6
+Added Member To Class: ClassName=PPGColle Member=Component P4 OLED
+Added Member To Class: ClassName=PPGColle Member=Component R1 100K次 (1003) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R2 2K次 (2001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R3 1K次 (1001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R4 1K次 (1001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R5 1K次 (1001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R6 1K次 (1001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R7 1K次 (1001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R8 22次 (22R0) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R9 22次 (22R0) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R10 22次 (22R0) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R11 22次 (22R0) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R12 22次 (22R0) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R13 22次 (22R0) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R14 1K次 (1001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component R15 1K次 (1001) ㊣1%
+Added Member To Class: ClassName=PPGColle Member=Component S1 SS-12F23
+Added Member To Class: ClassName=PPGColle Member=Component SW1 3x6x5
+Added Member To Class: ClassName=PPGColle Member=Component SW2 3x6x5
+Added Member To Class: ClassName=PPGColle Member=Component SW3 3x6x5
+Added Member To Class: ClassName=PPGColle Member=Component SW4 3x6x5
+Added Member To Class: ClassName=PPGColle Member=Component U1 STM32F405RGT6
+Added Member To Class: ClassName=PPGColle Member=Component U2 TP4056
+Added Member To Class: ClassName=PPGColle Member=Component U3 W25Q128FVSIG
+Added Member To Class: ClassName=PPGColle Member=Component U4 JY-61
+Added Member To Class: ClassName=PPGColle Member=Component U5 MAX30102
+Added Member To Class: ClassName=PPGColle Member=Component U6 CC2541
+Added Member To Class: ClassName=PPGColle Member=Component USB1 USB-5P
+Added Member To Class: ClassName=PPGColle Member=Component VR1 XC6206P332MR
+Added Member To Class: ClassName=PPGColle Member=Component VR2 XC6206P332MR
+Added Member To Class: ClassName=PPGColle Member=Component Y1 8MHz ㊣20ppm 20pF
+Added Member To Class: ClassName=PPGColle Member=Component Y2 32.768KHz ㊣20ppm 12.5pF
