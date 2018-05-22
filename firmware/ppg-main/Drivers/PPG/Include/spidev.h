@@ -6,6 +6,12 @@
 
 typedef struct {
 	SPI_HandleTypeDef* spi;
+
+	GPIO_TypeDef* SDAPortGroup;
+		uint16_t SDAPortIndex;
+	GPIO_TypeDef* SCLPortGroup;
+		uint16_t SCLPortIndex;
+
 	GPIO_TypeDef* DCPortGroup;
 	uint16_t DCPortIndex;
 	GPIO_TypeDef* CSPortGroup;
@@ -26,6 +32,12 @@ typedef struct {
 
 SPIDevice* SPIDeviceInit(
 		SPI_HandleTypeDef* pspi,
+		GPIO_TypeDef* pDCPortGroup, uint16_t pDCPortIndex,
+		GPIO_TypeDef* pCSPortGroup, uint16_t pCSPortIndex);
+
+SPIDevice* SoftSPIInit(
+		GPIO_TypeDef* pSDAPortGroup, uint16_t pSDAPortIndex,
+		GPIO_TypeDef* pSCLPortGroup, uint16_t pSCLPortIndex,
 		GPIO_TypeDef* pDCPortGroup, uint16_t pDCPortIndex,
 		GPIO_TypeDef* pCSPortGroup, uint16_t pCSPortIndex);
 

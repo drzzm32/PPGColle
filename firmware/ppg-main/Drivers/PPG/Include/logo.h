@@ -3,6 +3,7 @@
 
 
 const unsigned char* getLogo();
+const unsigned short* getImage();
 
 
 #endif

@@ -70,7 +70,6 @@ RNG_HandleTypeDef hrng;
 
 RTC_HandleTypeDef hrtc;
 
-SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
 UART_HandleTypeDef huart1;
@@ -93,7 +92,6 @@ FRESULT res;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
@@ -141,7 +139,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_SPI1_Init();
   MX_SPI2_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
@@ -156,10 +153,17 @@ int main(void)
 	USBD_Stop(&hUsbDeviceFS);
 	HAL_Delay(1000);
 
-	dev = RGBOLEDInit(&hspi1,
+	/*dev = RGBOLEDInit(&hspi1,
 		OLED_DC_GPIO_Port, OLED_DC_Pin,
 		OLED_CS_GPIO_Port, OLED_CS_Pin,
-		OLED_RST_GPIO_Port, OLED_RST_Pin);
+		OLED_RST_GPIO_Port, OLED_RST_Pin);*/
+
+	dev = SoftRGBInit(
+			OLED_SDA_GPIO_Port, OLED_SDA_Pin,
+			OLED_SCL_GPIO_Port, OLED_SCL_Pin,
+			OLED_DC_GPIO_Port, OLED_DC_Pin,
+			OLED_CS_GPIO_Port, OLED_CS_Pin,
+			OLED_RST_GPIO_Port, OLED_RST_Pin);
 
 	dev->reset(dev->p);
 	dev->init(dev->p);
@@ -169,10 +173,16 @@ int main(void)
 	dev->clear(dev->p);
 	dev->bitmapsc(dev->p, 63, 63, 64, 64, getLogo());
 
-	HAL_Delay(1000);
+	HAL_Delay(3000);
 	dev->colorb(dev->p, 0x000000);
 	dev->colorf(dev->p, 0xFFFFFF);
 	dev->clear(dev->p);
+
+	if (HAL_GPIO_ReadPin(B15_GPIO_Port, B15_Pin) == GPIO_PIN_RESET) {
+		dev->bitmap(dev->p, 0 ,0 ,128, 128, getImage());
+		HAL_Delay(3000);
+		while (HAL_GPIO_ReadPin(B15_GPIO_Port, B15_Pin) == GPIO_PIN_SET);
+	}
 
 	dev->printfa(dev->p, "================\n");
 	dev->printfa(dev->p, "PPGColle v1.0\n");
@@ -202,9 +212,12 @@ int main(void)
 		}
 	}
 
-	dev->printfa(dev->p, "Init USB...\n");
-	USBD_Start(&hUsbDeviceFS);
-	dev->printfa(dev->p, "USB initialized\n");
+	if (HAL_GPIO_ReadPin(B14_GPIO_Port, B14_Pin) == GPIO_PIN_RESET) {
+		dev->printfa(dev->p, "Init USB...\n");
+		USBD_Start(&hUsbDeviceFS);
+		dev->printfa(dev->p, "USB initialized\n");
+	}
+
 	HAL_GPIO_WritePin(LED_A_GPIO_Port, LED_A_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
@@ -383,30 +396,6 @@ static void MX_RTC_Init(void)
 
 }
 
-/* SPI1 init function */
-static void MX_SPI1_Init(void)
-{
-
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
-  hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
 /* SPI2 init function */
 static void MX_SPI2_Init(void)
 {
@@ -512,7 +501,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, OLED_CS_Pin|FLASH_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_A_Pin|LED_B_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_A_Pin|LED_B_Pin|OLED_SCL_Pin|OLED_SDA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, OLED_RST_Pin|OLED_DC_Pin, GPIO_PIN_RESET);
@@ -533,8 +522,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_A_Pin LED_B_Pin */
-  GPIO_InitStruct.Pin = LED_A_Pin|LED_B_Pin;
+  /*Configure GPIO pins : LED_A_Pin LED_B_Pin OLED_SCL_Pin OLED_SDA_Pin */
+  GPIO_InitStruct.Pin = LED_A_Pin|LED_B_Pin|OLED_SCL_Pin|OLED_SDA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;

@@ -69,6 +69,10 @@
 #define LED_B_GPIO_Port GPIOA
 #define BAT_ADC_Pin GPIO_PIN_4
 #define BAT_ADC_GPIO_Port GPIOA
+#define OLED_SCL_Pin GPIO_PIN_5
+#define OLED_SCL_GPIO_Port GPIOA
+#define OLED_SDA_Pin GPIO_PIN_7
+#define OLED_SDA_GPIO_Port GPIOA
 #define OLED_RST_Pin GPIO_PIN_4
 #define OLED_RST_GPIO_Port GPIOC
 #define OLED_DC_Pin GPIO_PIN_5

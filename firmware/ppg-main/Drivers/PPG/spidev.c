@@ -351,3 +351,67 @@ SPIDevice* SPIDeviceInit(
 
 	return c;
 }
+
+void _soft_spi_send(pSPIDevice* p, uint8_t byte) {
+#define __setpin(port, pin, state) (port)->BSRR = (state) ? (pin) : (pin << 16)
+	for (uint8_t i = 0; i < 8; i++) {
+		__setpin(p->SCLPortGroup, p->SCLPortIndex, 0);
+		__setpin(p->SDAPortGroup, p->SDAPortIndex, byte & (0x80 >> i));
+		__setpin(p->SCLPortGroup, p->SCLPortIndex, 1);
+	}
+#undef __setpin
+}
+
+void _soft_spi_write(pSPIDevice* p, uint16_t* word, uint32_t length) {
+	// here length is byte count
+	for (uint32_t i = 0; i < length / 2; i++) {
+		_soft_spi_send(p, (*(word + i) >> 8) & 0xFF);
+		_soft_spi_send(p, *(word + i) & 0xFF);
+	}
+}
+
+uint8_t _soft_spi_read(pSPIDevice* p) {
+	return 0x32;
+}
+
+void _soft_spi_sends(pSPIDevice* p, uint8_t byte, uint32_t count) {
+	for (uint32_t i = 0; i < count; i++)
+		_soft_spi_send(p, byte);
+}
+
+void _soft_spi_writes(pSPIDevice* p, uint16_t word, uint32_t count) {
+	for (uint32_t i = 0; i < count; i++) {
+		_soft_spi_send(p, (word >> 8) & 0xFF);
+		_soft_spi_send(p, word & 0xFF);
+	}
+
+}
+
+SPIDevice* SoftSPIInit(
+		GPIO_TypeDef* pSDAPortGroup, uint16_t pSDAPortIndex,
+		GPIO_TypeDef* pSCLPortGroup, uint16_t pSCLPortIndex,
+		GPIO_TypeDef* pDCPortGroup, uint16_t pDCPortIndex,
+		GPIO_TypeDef* pCSPortGroup, uint16_t pCSPortIndex) {
+	pSPIDevice* p = malloc(sizeof(pSPIDevice));
+	p->SDAPortGroup = pSDAPortGroup;
+	p->SDAPortIndex = pSDAPortIndex;
+	p->SCLPortGroup = pSCLPortGroup;
+	p->SCLPortIndex = pSCLPortIndex;
+	p->DCPortGroup = pDCPortGroup;
+	p->DCPortIndex = pDCPortIndex;
+	p->CSPortGroup = pCSPortGroup;
+	p->CSPortIndex = pCSPortIndex;
+
+	SPIDevice* c = malloc(sizeof(SPIDevice));
+	c->p = p;
+	c->start = &_spi_dev_start;
+	c->stop = &_spi_dev_stop;
+	c->dcs = &_spi_dev_dcs;
+	c->send = &_soft_spi_send;
+	c->write = &_soft_spi_write;
+	c->sends = &_soft_spi_sends;
+	c->writes = &_soft_spi_writes;
+	c->read = &_soft_spi_read;
+
+	return c;
+}

@@ -55,10 +55,10 @@ typedef struct {
 	void (*line)(pRGBOLED* p, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 	void (*tri)(pRGBOLED* p, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t fill);
 	void (*rect)(pRGBOLED* p, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t fill);
-	void (*bitmap)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t* data);
-	void (*bitmapc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t* data);
-	void (*bitmapt)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t trans, uint32_t* data);
-	void (*bitmaptc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t trans, uint32_t* data);
+	void (*bitmap)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t* data);
+	void (*bitmapc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t* data);
+	void (*bitmapt)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t trans, uint16_t* data);
+	void (*bitmaptc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t trans, uint16_t* data);
 	void (*bitmaps)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data);
 	void (*bitmapsc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data);
 	void (*draw)(pRGBOLED* p, uint16_t x, uint16_t y, char character);
@@ -70,6 +70,13 @@ typedef struct {
 
 RGBOLED* RGBOLEDInit(
 		SPI_HandleTypeDef* pspi,
+		GPIO_TypeDef* pDCPortGroup, uint16_t pDCPortIndex,
+		GPIO_TypeDef* pCSPortGroup, uint16_t pCSPortIndex,
+		GPIO_TypeDef* pRSTPortGroup, uint16_t pRSTPortIndex);
+
+RGBOLED* SoftRGBInit(
+		GPIO_TypeDef* pSDAPortGroup, uint16_t pSDAPortIndex,
+		GPIO_TypeDef* pSCLPortGroup, uint16_t pSCLPortIndex,
 		GPIO_TypeDef* pDCPortGroup, uint16_t pDCPortIndex,
 		GPIO_TypeDef* pCSPortGroup, uint16_t pCSPortIndex,
 		GPIO_TypeDef* pRSTPortGroup, uint16_t pRSTPortIndex);
