@@ -123,7 +123,11 @@ int main(void)
 
   print("PPGColle v1.0 - Collector\n");
 
-  while (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET);
+  while (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
+	  while (HAL_GPIO_ReadPin(MAX_INT_GPIO_Port, MAX_INT_Pin) == GPIO_PIN_SET);
+	  dev->fifo(dev->p, &red, &ir);
+	  print("%d\n", 160000 - ir);
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
