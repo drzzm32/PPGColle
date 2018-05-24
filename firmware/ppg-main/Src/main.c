@@ -189,7 +189,10 @@ int main(void)
 		dev->bitmap(dev->p, 0 ,0 ,128, 128, getImage());
 		HAL_Delay(3000);
 		while (HAL_GPIO_ReadPin(B15_GPIO_Port, B15_Pin) == GPIO_PIN_SET);
+		dev->clear(dev->p);
 	}
+
+	//HAL_GPIO_WritePin(BAT_CE_GPIO_Port, BAT_CE_Pin, GPIO_PIN_RESET);
 
 	dev->printfa(dev->p, "==============\n");
 	dev->printfa(dev->p, "PPGColle v1.0\n");
@@ -199,16 +202,34 @@ int main(void)
 	dev->printfa(dev->p, "Init flash...\n");
 	flash = FlashInit(&hspi2, FLASH_CS_GPIO_Port, FLASH_CS_Pin, W25Q128);
 	flashOK = flash->begin(flash->p);
-	dev->printfa(dev->p, "Flash state: %d\n", flashOK);
-	dev->printfa(dev->p, "Flash busy: %x\n", flash->busy(flash->p));
-	dev->printfa(dev->p, "Part ID: %x\n", flash->readPartID(flash->p));
-	dev->printfa(dev->p, "Unique ID: %x\n", flash->readUniqueID(flash->p));
+	dev->printfa(dev->p, "  State: %d\n", flashOK);
+	dev->printfa(dev->p, "  Busy: %d\n", flash->busy(flash->p));
+	dev->printfa(dev->p, "  PID: 0x%X\n", flash->readPartID(flash->p));
+	dev->printfa(dev->p, "  UID: 0x%X\n", flash->readUniqueID(flash->p));
 
 	if (HAL_GPIO_ReadPin(B13_GPIO_Port, B13_Pin) == GPIO_PIN_RESET) {
-		dev->printfa(dev->p, "Erase flash...\n");
-		flash->eraseAll(flash->p);
-		while (flash->busy(flash->p));
-		dev->printfa(dev->p, "Erase done.\n");
+		if (HAL_GPIO_ReadPin(B15_GPIO_Port, B15_Pin) == GPIO_PIN_RESET) {
+			dev->printfa(dev->p, "Erase flash...\n");
+			flash->eraseAll(flash->p);
+			while (flash->busy(flash->p));
+			dev->printfa(dev->p, "Erase done.\n");
+		} else {
+			dev->printfa(dev->p, "Test flash...\n");
+			for (uint8_t n = 0; n < 32; n++) {
+				dev->printfa(dev->p, "Test cycle: %d\n", n + 1);
+				uint8_t buf[512]; uint32_t addr = rand() & 0xFFFE00;
+				dev->printfa(dev->p, "  Addr: 0x%X\n", addr);
+				memset(buf, 0x32, 512);
+				flash->write512byte(flash->p, addr, buf);
+				memset(buf, 0x00, 512);
+				flash->read512byte(flash->p, addr, buf);
+				uint16_t diff = 0;
+				for (uint16_t i = 0; i < 512; i++)
+					if (buf[i] != 0x32) diff++;
+				dev->printfa(dev->p, "  Diff: %d\n", diff);
+				HAL_Delay(1000);
+			}
+		}
 	}
 
 	if (HAL_GPIO_ReadPin(B12_GPIO_Port, B12_Pin) == GPIO_PIN_RESET) {

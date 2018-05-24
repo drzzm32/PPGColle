@@ -13,7 +13,7 @@ void _flash_deselect(pFlashR* p) {
 
 uint8_t _flash_transfer(pFlashR* p, uint8_t x) {
 	uint8_t data = 0;
-	HAL_SPI_TransmitReceive(p->spi, &x, &data, 1, 1);
+	HAL_SPI_TransmitReceive(p->spi, &x, &data, 1, 10);
 	return data;
 }
 
