@@ -155,8 +155,7 @@ DRESULT USER_read (
   /* USER CODE BEGIN READ */
 	if (flashOK == 0) return RES_ERROR;
 	for (UINT i = 0; i < count; i++) {
-		flash->read(flash->p, 0x200 * (sector + i), buff + 0x200 * i, 0x100);
-		flash->read(flash->p, 0x200 * (sector + i) + 0x100, buff + 0x200 * i + 0x100, 0x100);
+		flash->read512byte(flash->p, _MIN_SS * (sector + i), buff + _MIN_SS * i);
 	}
     return RES_OK;
   /* USER CODE END READ */
@@ -181,8 +180,7 @@ DRESULT USER_write (
   /* USER CODE BEGIN WRITE */
 	if (flashOK == 0) return RES_ERROR;
 	for (UINT i = 0; i < count; i++) {
-		flash->writePage(flash->p, 0x200 * (sector + i), buff + 0x200 * i);
-		flash->writePage(flash->p, 0x200 * (sector + i) + 0x100, buff + 0x200 * i + 0x100);
+		flash->write512byte(flash->p, _MIN_SS * (sector + i), buff + _MIN_SS * i);
 	}
     return RES_OK;
   /* USER CODE END WRITE */

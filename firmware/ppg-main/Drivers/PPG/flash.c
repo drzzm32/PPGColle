@@ -1,6 +1,7 @@
 #include "./Include/flash.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 void _flash_select(pFlashR* p) {
 	HAL_GPIO_WritePin(p->CSPortGroup, p->CSPortIndex, GPIO_PIN_RESET);
@@ -239,6 +240,19 @@ void _flash_erase64kBlock(pFlashR* p, uint32_t addr_start) {
     _flash_deselect(p);
 }
 
+void _flash_read512byte(pFlashR* p, uint32_t addr, uint8_t *buf) {
+	_flash_read(p, addr, buf, 0x200);
+}
+
+void _flash_write512byte(pFlashR* p, uint32_t addr, uint8_t *buf) {
+	_flash_read(p, addr & 0x00fff000, p->buffer, FLASH_SECTOR_SIZ);
+	_flash_eraseSector(p, addr & 0x00fff000);
+	memcpy(p->buffer + (addr & 0x00fffE00 - addr & 0x00fff000), buf, 0x200);
+	for (uint8_t i = 0; i < FLASH_SECTOR_SIZ / FLASH_PAGE_SIZ; i++) {
+		_flash_writePage(p, addr + FLASH_PAGE_SIZ * i, p->buffer + FLASH_PAGE_SIZ * i);
+	}
+}
+
 void _flash_eraseAll(pFlashR* p) {
     _flash_select(p);
     _flash_transfer(p, CHIP_ERASE);
@@ -285,6 +299,8 @@ Flash* FlashInit(SPI_HandleTypeDef* hspi, GPIO_TypeDef* CSGroup, uint16_t CSInde
     c->eraseSector = &_flash_eraseSector;
     c->erase32kBlock = &_flash_erase32kBlock;
     c->erase64kBlock = &_flash_erase64kBlock;
+    c->read512byte = &_flash_read512byte;
+    c->write512byte = &_flash_write512byte;
     c->eraseAll = &_flash_eraseAll;
     c->eraseSuspend = &_flash_eraseSuspend;
     c->eraseResume = &_flash_eraseResume;

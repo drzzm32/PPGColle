@@ -53,6 +53,8 @@
 #include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
+#include <string.h>
+
 #include "usbd_core.h"
 #include "rgboled.h"
 #include "flash.h"
@@ -107,7 +109,12 @@ static void MX_RTC_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+float getBatV() {
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, 5);
+	uint16_t data = HAL_ADC_GetValue(&hadc1);
+	return (float) data / 4095.0F * 3.3F * 2.0F;
+}
 /* USER CODE END 0 */
 
 /**
@@ -184,18 +191,25 @@ int main(void)
 		while (HAL_GPIO_ReadPin(B15_GPIO_Port, B15_Pin) == GPIO_PIN_SET);
 	}
 
-	dev->printfa(dev->p, "================\n");
+	dev->printfa(dev->p, "==============\n");
 	dev->printfa(dev->p, "PPGColle v1.0\n");
 	dev->printfa(dev->p, "by drzzm32\n");
-	dev->printfa(dev->p, "================\n");
+	dev->printfa(dev->p, "==============\n");
 
-	dev->printfa(dev->p, "Init Flash...\n");
+	dev->printfa(dev->p, "Init flash...\n");
 	flash = FlashInit(&hspi2, FLASH_CS_GPIO_Port, FLASH_CS_Pin, W25Q128);
 	flashOK = flash->begin(flash->p);
 	dev->printfa(dev->p, "Flash state: %d\n", flashOK);
 	dev->printfa(dev->p, "Flash busy: %x\n", flash->busy(flash->p));
 	dev->printfa(dev->p, "Part ID: %x\n", flash->readPartID(flash->p));
 	dev->printfa(dev->p, "Unique ID: %x\n", flash->readUniqueID(flash->p));
+
+	if (HAL_GPIO_ReadPin(B13_GPIO_Port, B13_Pin) == GPIO_PIN_RESET) {
+		dev->printfa(dev->p, "Erase flash...\n");
+		flash->eraseAll(flash->p);
+		while (flash->busy(flash->p));
+		dev->printfa(dev->p, "Erase done.\n");
+	}
 
 	if (HAL_GPIO_ReadPin(B12_GPIO_Port, B12_Pin) == GPIO_PIN_RESET) {
 		f_mount(&fileSystem, USERPath, 1);
@@ -228,6 +242,11 @@ int main(void)
 	  HAL_GPIO_TogglePin(LED_A_GPIO_Port, LED_A_Pin);
 	  HAL_GPIO_TogglePin(LED_B_GPIO_Port, LED_B_Pin);
 	  HAL_Delay(500);
+
+	  dev->colorf(dev->p, 0xFF9800);
+	  dev->printf(dev->p, 96, 0, "%1.2fV", getBatV());
+	  dev->colorf(dev->p, 0xFFFFFF);
+
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */

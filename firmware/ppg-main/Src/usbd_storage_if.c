@@ -93,7 +93,7 @@ extern uint8_t flashOK;
   */
 
 #define STORAGE_LUN_NBR                  1
-#define STORAGE_BLK_NBR                  0x10000
+#define STORAGE_BLK_NBR                  0x8000
 #define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
@@ -223,8 +223,8 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
 {
   /* USER CODE BEGIN 3 */
 	if (flashOK == 0) return (USBD_FAIL);
-	*block_num  = 0x8000;
-	*block_size = 0x200;
+	*block_num  = STORAGE_BLK_NBR;
+	*block_size = STORAGE_BLK_SIZ;
 	return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -264,8 +264,7 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
   /* USER CODE BEGIN 6 */
 	if (flashOK == 0) return (USBD_FAIL);
 	for (uint16_t i = 0; i < blk_len; i++) {
-		flash->read(flash->p, 0x200 * (blk_addr + i), buf + 0x200 * i, 0x100);
-		flash->read(flash->p, 0x200 * (blk_addr + i) + 0x100, buf + 0x200 * i + 0x100, 0x100);
+		flash->read512byte(flash->p, STORAGE_BLK_SIZ * (blk_addr + i), buf + STORAGE_BLK_SIZ * i);
 	}
 	return (USBD_OK);
   /* USER CODE END 6 */
@@ -281,8 +280,7 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
   /* USER CODE BEGIN 7 */
 	if (flashOK == 0) return (USBD_FAIL);
 	for (uint16_t i = 0; i < blk_len; i++) {
-		flash->writePage(flash->p, 0x200 * (blk_addr + i), buf + 0x200 * i);
-		flash->writePage(flash->p, 0x200 * (blk_addr + i) + 0x100, buf + 0x200 * i + 0x100);
+		flash->write512byte(flash->p, STORAGE_BLK_SIZ * (blk_addr + i), buf + STORAGE_BLK_SIZ * i);
 	}
 	return (USBD_OK);
   /* USER CODE END 7 */
