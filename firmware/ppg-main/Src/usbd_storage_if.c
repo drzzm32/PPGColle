@@ -93,7 +93,7 @@ extern uint8_t flashOK;
   */
 
 #define STORAGE_LUN_NBR                  1
-#define STORAGE_BLK_NBR                  0x8000
+#define STORAGE_BLK_NBR                  0x10000
 #define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */

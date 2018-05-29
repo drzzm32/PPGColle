@@ -1,6 +1,8 @@
-#include <regscreen.h>
 #include "./Include/rgboled.h"
+
 #include "./Include/fonts.h"
+#include "./Include/regscreen.h"
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
