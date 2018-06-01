@@ -22,6 +22,11 @@ typedef struct {
 	uint8_t (*state)(pBLE* p);
 	uint8_t (*led)(pBLE* p);
 	void (*write)(pBLE* p, char* data);
+	void (*read)(pBLE* p, char* data, size_t len);
+
+	void (*ppg)(pBLE* p, int red, int ir);
+	void (*acc)(pBLE* p, float acc);
+
 } BLE;
 
 BLE* BLEInit(UART_HandleTypeDef* huart,

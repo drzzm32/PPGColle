@@ -27,6 +27,7 @@ typedef struct {
 	uint16_t width;
 	uint16_t height;
 	RGBLEDFont Font;
+	uint8_t scale;
 	uint16_t backColor;
 	uint16_t foreColor;
 	uint8_t rotate;
@@ -48,6 +49,7 @@ typedef struct {
 	void (*colorb)(pRGBOLED* p, uint32_t color);
 	void (*colorf)(pRGBOLED* p, uint32_t color);
 	void (*font)(pRGBOLED* p, RGBLEDFont f);
+	void (*scale)(pRGBOLED* p, uint8_t scale);
 	void (*clear)(pRGBOLED* p);
 	void (*scroll)(pRGBOLED* p, uint16_t pos);
 	void (*rotate)(pRGBOLED* p, uint8_t r);
@@ -61,6 +63,8 @@ typedef struct {
 	void (*bitmaptc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t trans, uint16_t* data);
 	void (*bitmaps)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data);
 	void (*bitmapsc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data);
+	void (*icon)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data);
+	void (*iconc)(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data);
 	void (*draw)(pRGBOLED* p, uint16_t x, uint16_t y, char character);
 	void (*print)(pRGBOLED* p, uint16_t x, uint16_t y, char* string);
 	int (*printf)(pRGBOLED* p, uint16_t x, uint16_t y, const char* format, ...);

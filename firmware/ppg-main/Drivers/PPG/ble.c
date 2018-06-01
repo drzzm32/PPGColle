@@ -38,6 +38,20 @@ void _ble_write(pBLE* p, char* data) {
 	_write(p->huart, "BLE", data);
 }
 
+void _ble_read(pBLE* p, char* data, size_t len) {
+	HAL_UART_Receive(p->huart, (uint8_t*) data, len, 50);
+}
+
+void _ble_ppg(pBLE* p, int red, int ir) {
+	char txBuf[32];
+	sprintf(txBuf, "%d,%d", red, ir);
+	HAL_UART_Transmit(p->huart, (uint8_t*) txBuf, strlen(txBuf), 50);
+}
+
+void _ble_acc(pBLE* p, float acc) {
+
+}
+
 BLE* BLEInit(UART_HandleTypeDef* huart,
 		GPIO_TypeDef* RSTPortGroup, uint16_t RSTPortIndex,
 		GPIO_TypeDef* STEPortGroup, uint16_t STEPortIndex,
@@ -58,6 +72,10 @@ BLE* BLEInit(UART_HandleTypeDef* huart,
     c->state = &_ble_state;
     c->led = &_ble_led;
     c->write = &_ble_write;
+    c->read = &_ble_read;
+
+    c->ppg = &_ble_ppg;
+    c->acc = &_ble_acc;
 
     return c;
 }

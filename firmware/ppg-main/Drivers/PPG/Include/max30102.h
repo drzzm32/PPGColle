@@ -51,6 +51,7 @@ typedef struct {
 	void (*reset)(pMAX30102* p);
 	void (*clrint)(pMAX30102* p);
 	void (*waitint)(pMAX30102* p);
+	uint8_t (*chkint)(pMAX30102* p);
 	void (*fifo)(pMAX30102* p, uint32_t* red, uint32_t* ir);
 } MAX30102;
 

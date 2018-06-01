@@ -1,10 +1,6 @@
 #include "ppg_system.h"
 
-#include "cmsis_os.h"
-
 #include <string.h>
-
-extern UART_HandleTypeDef huart1;
 
 extern BLE* ble;
 extern MPUnit* mpu;
@@ -13,49 +9,99 @@ extern Battery* bat;
 extern MAX30102* max30102;
 extern uint32_t red, ir;
 
-osThreadId hBLEStateCheck;
-osThreadId hBatteryVoltCheck;
+void PPGUpload();
+void BLEStateCheck();
+void BLEDataReceive();
+void BatteryVoltCheck();
 
-void BLEStateCheck(void const * argument);
-void BatteryVoltCheck(void const * argument);
+Work workList[] = {
+	{ &PPGUpload },
+	{ &BLEStateCheck },
+	//{ &BLEDataReceive },
+	{ &BatteryVoltCheck },
+	{ 0 }
+};
 
-void registerThreads() {
-	osThreadDef(bleCheck, BLEStateCheck, osPriorityNormal, 0, 128);
-	hBLEStateCheck = osThreadCreate(osThread(bleCheck), NULL);
+volatile uint32_t tookTime;
+volatile uint32_t tick = 0;
+#define defineWork(period) if (tick % period == 0)
 
-	osThreadDef(batCheck, BatteryVoltCheck, osPriorityNormal, 0, 128);
-	hBatteryVoltCheck = osThreadCreate(osThread(batCheck), NULL);
+static uint32_t times[8] = { 0 };
+
+void systemWork() {
+	if (tick == 0) {
+		dev->bitmaps(dev->p, 0, 0, 128, 128, getBackground());
+		HAL_GPIO_TogglePin(LED_A_GPIO_Port, LED_A_Pin);
+	}
+
+	tookTime = HAL_GetTick();
+
+	for (uint8_t i = 0; workList[i].run != 0; i++)
+		workList[i].run();
+
+	tookTime = HAL_GetTick() - tookTime;
+
+	memmove(times, times + 1, 7);
+	times[7] = tookTime;
+	float result = 0.0F;
+	for (uint8_t i = 0; i < 8; i++)
+		result += (float) times[i];
+	result /= 8.0F;
+	dev->printf(dev->p, 0, 118, "dt: %1.2f ms", result);
+
+	tick += 1;
+	HAL_GPIO_TogglePin(LED_A_GPIO_Port, LED_A_Pin);
+	HAL_GPIO_TogglePin(LED_B_GPIO_Port, LED_B_Pin);
 }
 
-char rxBuf[32]; char txBuf[32];
-void BLEStateCheck(void const * argument) {
-	while (1) {
-		HAL_GPIO_WritePin(LED_A_GPIO_Port, LED_A_Pin, ble->led(ble->p));
-		HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, ble->state(ble->p));
-
-		if (ble->state(ble->p)) {
-			max30102->waitint(max30102->p);
+void PPGUpload() {
+	defineWork(1) {
+		if (max30102->chkint(max30102->p)) {
 			max30102->fifo(max30102->p, &red, &ir);
-			sprintf(txBuf, "%d,%d", red, ir);
-			HAL_UART_Transmit(&huart1, (uint8_t*) txBuf, strlen(txBuf), 100);
-
-			HAL_UART_Receive(&huart1, (uint8_t*) rxBuf, 32, 100);
-			if (strlen(rxBuf) > 0)
-				print("%s\n", rxBuf);
-
-			memset(rxBuf, 0, 32);
-			memset(txBuf, 0, 32);
-		} else {
-			osDelay(100);
+			if (ble->state(ble->p))
+				ble->ppg(ble->p, red, ir);
 		}
 	}
 }
 
-void BatteryVoltCheck(void const * argument) {
-	while (1) {
-		dev->colorf(dev->p, 0xFF9800);
-		dev->printf(dev->p, 96, 0, "%1.2fV", bat->voltage(bat->p));
-		dev->colorf(dev->p, 0xFFFFFF);
-		osDelay(500);
+void BLEStateCheck() {
+	defineWork(10) {
+		dev->icon(dev->p, 0, 0, PPG_TOP_WIDTH, PPG_TOP_HEIGHT, getTopIcon(ble->state(ble->p) ? PPG_TOP_BT_OK : PPG_TOP_BT));
+		dev->icon(dev->p, 20, 0, PPG_TOP_WIDTH, PPG_TOP_HEIGHT, getTopIcon(ble->led(ble->p) ? PPG_TOP_LED_ON : PPG_TOP_LED));
 	}
 }
+
+static char rxBuf[32];
+void BLEDataReceive() {
+	defineWork(5) {
+		memset(rxBuf, 0, 32);
+		if (ble->state(ble->p)) {
+			ble->read(ble->p, rxBuf, 32);
+			if (strlen(rxBuf) > 0)
+				print("%s\n", rxBuf);
+		}
+	}
+}
+
+void BatteryVoltCheck() {
+	defineWork(10) {
+		float volt = bat->voltage(bat->p);
+		if (volt > BAT_USBV)
+			dev->icon(dev->p, 87, 0, PPG_TOP_WIDTH, PPG_TOP_HEIGHT, getTopIcon(PPG_TOP_USB));
+		else
+			dev->icon(dev->p, 87, 0, PPG_TOP_WIDTH, PPG_TOP_HEIGHT, getBlank());
+
+		if (volt > BAT_CHGV)
+			dev->icon(dev->p, 107, 0, PPG_TOP_WIDTH, PPG_TOP_HEIGHT, getTopIcon(PPG_TOP_BAT_CHG));
+		else if (volt < BAT_LOWV)
+			dev->icon(dev->p, 107, 0, PPG_TOP_WIDTH, PPG_TOP_HEIGHT, getTopIcon(PPG_TOP_BAT_LOW));
+		else
+			dev->icon(dev->p, 107, 0, PPG_TOP_WIDTH, PPG_TOP_HEIGHT, getTopIcon(PPG_TOP_BAT));
+
+		dev->colorf(dev->p, 0xFF9800);
+		dev->printfc(dev->p, 12, "%1.2fV", bat->voltage(bat->p));
+		dev->colorf(dev->p, 0xFFFFFF);
+	}
+}
+
+#undef defineWork

@@ -9,6 +9,25 @@
 
 <filestoremove>
     <file>
+    <name>..\Src\freertos.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\MemMang\heap_4.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\croutine.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\event_groups.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\list.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\queue.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\tasks.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\timers.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS\cmsis_os.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\MemMang\heap_4.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\croutine.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\event_groups.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\list.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\queue.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\tasks.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\timers.c</name>
+    <name>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS\cmsis_os.c</name>
     </file>
 </filestoremove>
 
@@ -17,6 +36,9 @@
 	   <include></include>
     </Aincludes>
 	<Cincludes>
+	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F</include>
+	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\include</include>
+	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS</include>
     </Cincludes>
 </inctoremove>
 
@@ -37,9 +59,11 @@
         <define></define>
     </Adefines>   
 
-    <UsedFreeRTOS>true</UsedFreeRTOS>
+    <UsedFreeRTOS></UsedFreeRTOS>
     <Aincludes>
-		   		<include></include>
+
+
+	    	<include></include>
     </Aincludes>
     <Cdefines>
         <define>__weak=__attribute__((weak))</define>
@@ -59,13 +83,10 @@
 	   <include>..\Inc</include>
 	   <include>..\Drivers\STM32F4xx_HAL_Driver\Inc</include>
 	   <include>..\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy</include>
-	   <include>..\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F</include>
 	   <include>..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc</include>
 	   <include>..\Middlewares\ST\STM32_USB_Device_Library\Class\MSC\Inc</include>
 	   <include>..\Drivers\CMSIS\Device\ST\STM32F4xx\Include</include>
 	   <include>..\Middlewares\Third_Party\FatFs\src</include>
-	   <include>..\Middlewares\Third_Party\FreeRTOS\Source\include</include>
-	   <include>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS</include>
 	   <include>..\Drivers\CMSIS\Include</include>
 
     </Cincludes>

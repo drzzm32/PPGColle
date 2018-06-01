@@ -5,6 +5,7 @@
 #include "nsio.h"
 
 #include "rgboled.h"
+#include "asset.h"
 #include "flash.h"
 #include "logo.h"
 #include "ble.h"
@@ -12,7 +13,7 @@
 #include "max30102.h"
 #include "battery.h"
 
-#define VERSION "dev180531"
+#define VERSION "dev180601"
 
 void extTest();
 void hardwareInit();

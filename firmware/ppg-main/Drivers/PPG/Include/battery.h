@@ -5,6 +5,9 @@
 #include "halinc.h"
 
 #define BAT_REFV 3.3F
+#define BAT_USBV 4.3F
+#define BAT_LOWV 3.6F
+#define BAT_CHGV 4.25F
 
 typedef struct {
 	ADC_HandleTypeDef* adc;

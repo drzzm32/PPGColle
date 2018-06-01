@@ -4,7 +4,11 @@
 
 #include "ppg_bios.h"
 
-void registerThreads();
+typedef struct {
+	void (*run)();
+} Work;
+
+void systemWork();
 
 
 #endif

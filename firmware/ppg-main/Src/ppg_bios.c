@@ -113,14 +113,19 @@ void hardwareInit() {
 
 	print("==============\n");
 	print("PPGColle v1.0\n");
-	print("by drzzm32\n");
+	dev->colorf(dev->p, 0xFF9800);
+	print(" %s\n", VERSION);
+	dev->colorf(dev->p, 0xFFFFFF);
 	print("==============\n");
 	HAL_Delay(1000);
 
 	print("Init Battery...\n");
 	bat = BatteryInit(&hadc1, 2.0F);
 	bat->refresh(bat->p);
-	print("  Volt: %1.2f\n", bat->voltage(bat->p));
+	float volt = bat->voltage(bat->p);
+	print("  Volt: %1.2f\n", volt);
+	if (volt > BAT_USBV)
+		print("  USB Powered\n");
 	print("\n");
 	HAL_Delay(3000);
 
@@ -145,11 +150,11 @@ void hardwareInit() {
 	float x = 0.0F, y = 0.0F, z = 0.0F;
 	while (x == 0.0F) mpu->acc(mpu->p, &x, &y, &z);
 	float sum = sqrt(x * x + y * y + z * z);
-	print("  AccX: %f\n", x);
-	print("  AccY: %f\n", y);
-	print("  AccZ: %f\n", z);
-	print("  AccSum: %f\n", sum);
-	print("  Temper: %f\n", mpu->p->temper);
+	print("  AccX: %1.2f\n", x);
+	print("  AccY: %1.2f\n", y);
+	print("  AccZ: %1.2f\n", z);
+	print("  AccSum: %1.2f\n", sum);
+	print("  Temper: %1.2f\n", mpu->p->temper);
 	print("\n");
 	HAL_Delay(3000);
 

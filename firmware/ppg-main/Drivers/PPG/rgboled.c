@@ -8,12 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static uint16_t _buf[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+static uint16_t _buf[512] = { 0 };
 
 void _rgb_writeCommand(pRGBOLED* p, uint8_t cmd) {
 	p->base->start(p->base->p);
@@ -144,6 +139,8 @@ void _rgb_back_color(pRGBOLED* p, uint32_t color) { p->backColor = _rgb_color_co
 void _rgb_fore_color(pRGBOLED* p, uint32_t color) { p->foreColor = _rgb_color_conv(color); }
 
 void _rgb_font(pRGBOLED* p, RGBLEDFont f) { p->Font = f; }
+
+void _rgb_scale(pRGBOLED* p, uint8_t scale) { p->scale = scale == 0 ? 1 : scale; }
 
 void _rgb_clear(pRGBOLED* p) {
 	_rgb_setPosition(p, 0, 0, p->width - 1, p->height - 1);
@@ -310,42 +307,121 @@ void _rgb_bitmapsc(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
 	_rgb_bitmaps(p, x - w / 2, y - h / 2, w, h, data);
 }
 
+void _rgb_icon(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data) {
+	if (h % 8 != 0) return;
+
+	for (uint16_t i = 0; i < w; i++) {
+		for (uint16_t j = 0; j < h; j++) {
+			if (data[i * h / 8 + j / 8] & (1 << (j % 8)))
+				_buf[j] = p->foreColor;
+			else
+				_buf[j] = p->backColor;
+		}
+		_rgb_setPosition(p, x + i, y, x + i, y + h - 1);
+		_rgb_writeCommand(p, SSD1351_CMD_WRITERAM);
+		_rgb_writeData16s(p, _buf, h);
+	}
+}
+
+void _rgb_iconc(pRGBOLED* p, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const unsigned char* data) {
+	_rgb_icon(p, x - w / 2, y - h / 2, w, h, data);
+}
+
 void _rgb_draw(pRGBOLED* p, uint16_t x, uint16_t y, char character) {
 	char c = character - ' ';
-	if (p->Font == RGBBig) {
-		if (x >= p->width) { x = 0; y = y + 16; }
-		for (uint8_t i = 0; i < 8; i++) {
-			for (uint8_t j = 0; j < 8; j++) {
-				if (getFont(1)[c * 16 + i] & (1 << j))
-					_buf[i + j * 8] = p->foreColor;
-				else 
-					_buf[i + j * 8] = p->backColor;
+	if (p->scale == 1) {
+		if (p->Font == RGBBig) {
+			if (x >= p->width) { x = 0; y = y + 16; }
+			for (uint8_t i = 0; i < 8; i++) {
+				for (uint8_t j = 0; j < 8; j++) {
+					if (getFont(1)[c * 16 + i] & (1 << j))
+						_buf[i + j * 8] = p->foreColor;
+					else
+						_buf[i + j * 8] = p->backColor;
+				}
 			}
-		}
-		for (uint8_t i = 0; i < 8; i++) {
-			for (uint8_t j = 0; j < 8; j++) {
-				if (getFont(1)[c * 16 + i + 8] & (1 << j))
-					_buf[i + j * 8 + 64] = p->foreColor;
-				else 
-					_buf[i + j * 8 + 64] = p->backColor;
+			for (uint8_t i = 0; i < 8; i++) {
+				for (uint8_t j = 0; j < 8; j++) {
+					if (getFont(1)[c * 16 + i + 8] & (1 << j))
+						_buf[i + j * 8 + 64] = p->foreColor;
+					else
+						_buf[i + j * 8 + 64] = p->backColor;
+				}
 			}
-		}
-		_rgb_setPosition(p, x, y, x + 7, y + 15);
-		_rgb_writeCommand(p, SSD1351_CMD_WRITERAM);
-		_rgb_writeData16s(p, _buf, 128);
-	} else {
-		if (x >= p->width) { x = 0; y = y + 8; }
-		for (uint8_t i = 0; i < 6; i++) {
-			for (uint8_t j = 0; j < 8; j++) {
-				if (getFont(0)[c *6 + i] & (1 << j))
-					_buf[i + j * 6] = p->foreColor;
-				else 
-					_buf[i + j * 6] = p->backColor;
+			_rgb_setPosition(p, x, y, x + 7, y + 15);
+			_rgb_writeCommand(p, SSD1351_CMD_WRITERAM);
+			_rgb_writeData16s(p, _buf, 128);
+		} else {
+			if (x >= p->width) { x = 0; y = y + 8; }
+			for (uint8_t i = 0; i < 6; i++) {
+				for (uint8_t j = 0; j < 8; j++) {
+					if (getFont(0)[c * 6 + i] & (1 << j))
+						_buf[i + j * 6] = p->foreColor;
+					else
+						_buf[i + j * 6] = p->backColor;
+				}
 			}
+			_rgb_setPosition(p, x, y, x + 5, y + 7);
+			_rgb_writeCommand(p, SSD1351_CMD_WRITERAM);
+			_rgb_writeData16s(p, _buf, 48);
 		}
-		_rgb_setPosition(p, x, y, x + 5, y + 7);
-		_rgb_writeCommand(p, SSD1351_CMD_WRITERAM);
-		_rgb_writeData16s(p, _buf, 48);
+	} else if (p->scale == 2) {
+		if (p->Font == RGBBig) {
+			if (x >= p->width) { x = 0; y = y + 32; }
+			for (uint8_t i = 0; i < 8; i++) {
+				for (uint8_t j = 0; j < 8; j++) {
+					if (getFont(1)[c * 16 + i] & (1 << j)) {
+						_buf[i * 2 + j * 2 * 16] = p->foreColor;
+						_buf[i * 2 + 1 + j * 2 * 16] = p->foreColor;
+						_buf[i * 2 + (j * 2 + 1) * 16] = p->foreColor;
+						_buf[i * 2 + 1 + (j * 2 + 1) * 16] = p->foreColor;
+					} else {
+						_buf[i * 2 + j * 2 * 16] = p->backColor;
+						_buf[i * 2 + 1 + j * 2 * 16] = p->backColor;
+						_buf[i * 2 + (j * 2 + 1) * 16] = p->backColor;
+						_buf[i * 2 + 1 + (j * 2 + 1) * 16] = p->backColor;
+					}
+				}
+			}
+			for (uint8_t i = 0; i < 8; i++) {
+				for (uint8_t j = 0; j < 8; j++) {
+					if (getFont(1)[c * 16 + i + 8] & (1 << j)) {
+						_buf[i * 2 + j * 2 * 16 + 256] = p->foreColor;
+						_buf[i * 2 + 1 + j * 2 * 16 + 256] = p->foreColor;
+						_buf[i * 2 + (j * 2 + 1) * 16 + 256] = p->foreColor;
+						_buf[i * 2 + 1 + (j * 2 + 1) * 16 + 256] = p->foreColor;
+					} else {
+						_buf[i * 2 + j * 2 * 16 + 256] = p->backColor;
+						_buf[i * 2 + 1 + j * 2 * 16 + 256] = p->backColor;
+						_buf[i * 2 + (j * 2 + 1) * 16 + 256] = p->backColor;
+						_buf[i * 2 + 1 + (j * 2 + 1) * 16 + 256] = p->backColor;
+					}
+				}
+			}
+			_rgb_setPosition(p, x, y, x + 15, y + 31);
+			_rgb_writeCommand(p, SSD1351_CMD_WRITERAM);
+			_rgb_writeData16s(p, _buf, 512);
+		} else {
+			if (x >= p->width) { x = 0; y = y + 16; }
+			for (uint8_t i = 0; i < 6; i++) {
+				for (uint8_t j = 0; j < 8; j++) {
+					if (getFont(0)[c * 6 + i] & (1 << j)) {
+						_buf[i * 2 + j * 2 * 6] = p->foreColor;
+						_buf[i * 2 + 1 + j * 2 * 6] = p->foreColor;
+						_buf[i * 2 + (j * 2 + 1) * 6] = p->foreColor;
+						_buf[i * 2 + 1 + (j * 2 + 1) * 6] = p->foreColor;
+					} else {
+						_buf[i * 2 + j * 2 * 6] = p->backColor;
+						_buf[i * 2 + 1 + j * 2 * 6] = p->backColor;
+						_buf[i * 2 + (j * 2 + 1) * 6] = p->backColor;
+						_buf[i * 2 + 1 + (j * 2 + 1) * 6] = p->backColor;
+					}
+				}
+			}
+			_rgb_setPosition(p, x, y, x + 11, y + 15);
+			_rgb_writeCommand(p, SSD1351_CMD_WRITERAM);
+			_rgb_writeData16s(p, _buf, 192);
+		}
 	}
 }
 
@@ -379,70 +455,70 @@ void _rgb_printa_(pRGBOLED* p, char* string) {
 	int i = 0;
 	if (p->Font == RGBBig) {
 		while (string[i] != '\0') {
-			if (p->ptrY > p->height - 16) {
+			if (p->ptrY > p->height - 16 * p->scale) {
 				p->ptrX = 0;
-				p->ptrY = p->height - 16;
+				p->ptrY = p->height - 16 * p->scale;
 				_rgb_scroll(p, 1);
 			}
 			if (string[i] == '\n') {
 				i++;
 				p->ptrX = 0;
-				p->ptrY += 16;
+				p->ptrY += 16 * p->scale;
 				continue;
 			}
 			if (string[i] == 0x08) {
 				i++;
-				if (p->ptrX >= 8) p->ptrX -= 8;
+				if (p->ptrX >= 8 * p->scale) p->ptrX -= 8 * p->scale;
 				else {
-					p->ptrX = p->width - 8;
-					p->ptrY -= 16;
+					p->ptrX = p->width - 8 * p->scale;
+					p->ptrY -= 16 * p->scale;
 				}
 				_rgb_draw(p, p->ptrX, p->ptrY, ' ');
 				continue;
 			}
 			_rgb_draw(p, p->ptrX, p->ptrY, string[i]);
-			p->buffer[p->ptrY / 16][p->ptrX / 8] = string[i];
-			p->ptrX += 8;
-			if (p->ptrX > p->width - 8) {
+			p->buffer[p->ptrY / 16 * p->scale][p->ptrX / 8 * p->scale] = string[i];
+			p->ptrX += 8 * p->scale;
+			if (p->ptrX > p->width - 8 * p->scale) {
 				p->ptrX = 0;
-				p->ptrY += 16;
+				p->ptrY += 16 * p->scale;
 			}
 			i++;
 		}
-		if (string[i] == '\0') p->buffer[p->ptrY / 16][p->ptrX / 8] = string[i];
+		if (string[i] == '\0') p->buffer[p->ptrY / 16 * p->scale][p->ptrX / 8 * p->scale] = string[i];
 	} else {
 		while (string[i] != '\0') {
-			if (p->ptrY > p->height - 8) {
+			if (p->ptrY > p->height - 8 * p->scale) {
 				p->ptrX = 0;
-				p->ptrY = p->height - 8;
+				p->ptrY = p->height - 8 * p->scale;
 				_rgb_scroll(p, 1);
 			}
 			if (string[i] == '\n') {
 				i++;
 				p->ptrX = 0;
-				p->ptrY += 8;
+				p->ptrY += 8 * p->scale;
 				continue;
 			}
 			if (string[i] == 0x08) {
 				i++;
-				if (p->ptrX >= 6) p->ptrX -= 6;
+				if (p->ptrX >= 6 * p->scale) p->ptrX -= 6 * p->scale;
 				else {
-					p->ptrX = p->width - 6;
-					p->ptrY -= 8;
+					p->ptrX = p->width - 6 * p->scale;
+					p->ptrY -= 8 * p->scale;
 				}
 				_rgb_draw(p, p->ptrX, p->ptrY, ' ');
 				continue;
 			}
 			_rgb_draw(p, p->ptrX, p->ptrY, string[i]);
-			p->buffer[p->ptrY / 8][p->ptrX / 6] = string[i];
-			p->ptrX += 6;
-			if (p->ptrX >= p->width - 6) {
+			p->buffer[p->ptrY / 8 * p->scale][p->ptrX / 6 * p->scale] = string[i];
+			p->ptrX += 6 * p->scale;
+			if (p->ptrX >= p->width - 6 * p->scale) {
 				p->ptrX = 0;
-				p->ptrY += 8;
+				p->ptrY += 8 * p->scale;
 			}
 			i++;
 		}
-		if (string[i] == '\0') p->buffer[p->ptrY / 8][p->ptrX / 6] = string[i];
+		if (string[i] == '\0') p->buffer[p->ptrY / 8 * p->scale][p->ptrX / 6 * p->scale] = string[i];
 	}
 }
 
@@ -450,7 +526,7 @@ void _rgb_print(pRGBOLED* p, uint16_t x, uint16_t y, char* string) {
 	int i = 0;
 	if (p->Font == RGBBig) {
 		while (string[i] != '\0') {
-			if (y > p->height - 16) {
+			if (y > p->height - 16 * p->scale) {
 				x = 0;
 				y = 0;
 				_rgb_clear(p);
@@ -458,30 +534,30 @@ void _rgb_print(pRGBOLED* p, uint16_t x, uint16_t y, char* string) {
 			if (string[i] == '\n') {
 				i++;
 				x = 0;
-				y += 16;
+				y += 16 * p->scale;
 				continue;
 			}
 			if (string[i] == 0x08) {
 				i++;
-				if (x >= 8) x -= 8;
+				if (x >= 8 * p->scale) x -= 8 * p->scale;
 				else {
-					x = p->width - 8;
-					y -= 16;
+					x = p->width - 8 * p->scale;
+					y -= 16 * p->scale;
 				}
 				_rgb_draw(p, x, y, ' ');
 				continue;
 			}
 			_rgb_draw(p, x, y, string[i]);
-			x += 8;
-			if (x > p->width - 8) {
+			x += 8 * p->scale;
+			if (x > p->width - 8 * p->scale) {
 				x = 0;
-				y += 16;
+				y += 16 * p->scale;
 			}
 			i++;
 		}
 	} else {
 		while (string[i] != '\0') {
-			if (y > p->height - 8) {
+			if (y > p->height - 8 * p->scale) {
 				x = 0;
 				y = 0;
 				_rgb_clear(p);
@@ -489,24 +565,24 @@ void _rgb_print(pRGBOLED* p, uint16_t x, uint16_t y, char* string) {
 			if (string[i] == '\n') {
 				i++;
 				x = 0;
-				y += 8;
+				y += 8 * p->scale;
 				continue;
 			}
 			if (string[i] == 0x08) {
 				i++;
-				if (x >= 6) x -= 6;
+				if (x >= 6 * p->scale) x -= 6 * p->scale;
 				else {
-					x = p->width - 6;
-					y -= 8;
+					x = p->width - 6 * p->scale;
+					y -= 8 * p->scale;
 				}
 				_rgb_draw(p, x, y, ' ');
 				continue;
 			}
 			_rgb_draw(p, x, y, string[i]);
-			x += 6;
-			if (x >= p->width - 6) {
+			x += 6 * p->scale;
+			if (x >= p->width - 6 * p->scale) {
 				x = 0;
-				y += 8;
+				y += 8 * p->scale;
 			}
 			i++;
 		}
@@ -559,12 +635,13 @@ RGBOLED* RGBOLEDInit(
 	p->width = 128;
 	p->height = 128;
 	p->Font = RGBSmall;
+	p->scale = 1;
 	p->backColor = 0x0000;
 	p->foreColor = 0xFFFF;
 	p->rotate = RGB_PORTRAIT;
 	p->ptrX = p->ptrY = 0;
 	memset(p->buffer, 0, RGB_IOBUF_WIDTH * RGB_IOBUF_HEIGHT);
-			
+
 	RGBOLED* c = malloc(sizeof(RGBOLED));
 	c->p = p;
 	#ifdef RGB_USE_PRIVATE_FUN
@@ -578,6 +655,7 @@ RGBOLED* RGBOLEDInit(
 	c->colorb = &_rgb_back_color;
 	c->colorf = &_rgb_fore_color;
 	c->font = &_rgb_font;
+	c->scale = &_rgb_scale;
 	c->clear = &_rgb_clear;
 	c->scroll = *_rgb_scroll;
 	c->rotate = &_rgb_rotate;
@@ -591,6 +669,8 @@ RGBOLED* RGBOLEDInit(
 	c->bitmaptc = &_rgb_bitmaptc;
 	c->bitmaps = &_rgb_bitmaps;
 	c->bitmapsc = &_rgb_bitmapsc;
+	c->icon = &_rgb_icon;
+	c->iconc = &_rgb_iconc;
 	c->draw = &_rgb_draw;
 	c->print = &_rgb_print;
 	c->printf = &_rgb_printf;
@@ -618,6 +698,7 @@ RGBOLED* SoftRGBInit(
 	p->width = 128;
 	p->height = 128;
 	p->Font = RGBSmall;
+	p->scale = 1;
 	p->backColor = 0x0000;
 	p->foreColor = 0xFFFF;
 	p->rotate = RGB_PORTRAIT;
@@ -637,6 +718,7 @@ RGBOLED* SoftRGBInit(
 	c->colorb = &_rgb_back_color;
 	c->colorf = &_rgb_fore_color;
 	c->font = &_rgb_font;
+	c->scale = &_rgb_scale;
 	c->clear = &_rgb_clear;
 	c->scroll = *_rgb_scroll;
 	c->rotate = &_rgb_rotate;
@@ -650,6 +732,8 @@ RGBOLED* SoftRGBInit(
 	c->bitmaptc = &_rgb_bitmaptc;
 	c->bitmaps = &_rgb_bitmaps;
 	c->bitmapsc = &_rgb_bitmapsc;
+	c->icon = &_rgb_icon;
+	c->iconc = &_rgb_iconc;
 	c->draw = &_rgb_draw;
 	c->print = &_rgb_print;
 	c->printf = &_rgb_printf;

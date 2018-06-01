@@ -48,6 +48,10 @@ void _max_30102_waitint(pMAX30102* p) {
 	}
 }
 
+uint8_t _max_30102_chkint(pMAX30102* p) {
+	return HAL_GPIO_ReadPin(p->INTPortGroup, p->INTPortIndex) == GPIO_PIN_RESET;
+}
+
 void _max_30102_fifo(pMAX30102* p, uint32_t* red, uint32_t* ir) {
 	uint8_t buffer[6];
 	*red = 0; *ir = 0;
@@ -87,6 +91,7 @@ MAX30102* MAX30102Init(I2C_HandleTypeDef* pi2c, uint8_t pIICAddr,
 	c->reset = &_max_30102_reset;
 	c->clrint = &_max_30102_clrint;
 	c->waitint = &_max_30102_waitint;
+	c->chkint = &_max_30102_chkint;
 	c->fifo = &_max_30102_fifo;
 
 	return c;
