@@ -5,6 +5,8 @@
 #include "halinc.h"
 
 #define BLE_BUFSIZ 32
+#define BLE_PACKSIZ 13
+#define BLE_PACKBUF (BLE_PACKSIZ * 2)
 
 typedef struct {
 	UART_HandleTypeDef* huart;
@@ -17,6 +19,22 @@ typedef struct {
 } pBLE;
 
 typedef struct {
+	uint8_t hour;
+	uint8_t minute;
+
+	uint8_t heart;
+	float SpO2;
+	uint8_t breath;
+
+	uint8_t phone;
+	uint8_t message;
+
+	uint8_t weather;
+
+	uint8_t control;
+} DataPack;
+
+typedef struct {
 	pBLE* p;
 	void (*reset)(pBLE* p);
 	uint8_t (*state)(pBLE* p);
@@ -26,7 +44,7 @@ typedef struct {
 
 	void (*ppg)(pBLE* p, int red, int ir);
 	void (*acc)(pBLE* p, float acc);
-
+	void (*pull)(pBLE* p, DataPack* pack);
 } BLE;
 
 BLE* BLEInit(UART_HandleTypeDef* huart,

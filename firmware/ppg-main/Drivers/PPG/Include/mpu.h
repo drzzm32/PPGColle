@@ -17,6 +17,7 @@ typedef struct {
 	pMPU* p;
 	void (*reset)(pMPU* p);
 	void (*acc)(pMPU* p, float* x, float* y, float* z);
+	float (*accsum)(pMPU* p);
 } MPUnit;
 
 MPUnit* MPUInit(UART_HandleTypeDef* huart, float G);

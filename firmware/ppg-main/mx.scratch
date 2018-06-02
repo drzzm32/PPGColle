@@ -9,25 +9,6 @@
 
 <filestoremove>
     <file>
-    <name>..\Src\freertos.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\MemMang\heap_4.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\croutine.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\event_groups.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\list.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\queue.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\tasks.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\timers.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS\cmsis_os.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\MemMang\heap_4.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\croutine.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\event_groups.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\list.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\queue.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\tasks.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\timers.c</name>
-    <name>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS\cmsis_os.c</name>
     </file>
 </filestoremove>
 
@@ -36,9 +17,6 @@
 	   <include></include>
     </Aincludes>
 	<Cincludes>
-	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F</include>
-	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\include</include>
-	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS</include>
     </Cincludes>
 </inctoremove>
 
@@ -46,8 +24,8 @@
   <config>
     <name>ppg-main</name>				
     <device>STM32F405RGTx</device>		 
-    <heapSize>0x200</heapSize>
-    <stackSize>0x400</stackSize>
+    <heapSize>0x400</heapSize>
+    <stackSize>0x800</stackSize>
     
     	<board>custom</board>
 			

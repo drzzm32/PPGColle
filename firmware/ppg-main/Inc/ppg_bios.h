@@ -13,9 +13,14 @@
 #include "max30102.h"
 #include "battery.h"
 
-#define VERSION "dev180601"
+#define VERSION "dev180602"
+#define CHK_DELAY 1000
 
+//#define USE_TESTFUNC
+
+#ifdef USE_TESTFUNC
 void extTest();
+#endif
 void hardwareInit();
 
 

@@ -69,6 +69,7 @@ typedef struct {
 	void (*print)(pRGBOLED* p, uint16_t x, uint16_t y, char* string);
 	int (*printf)(pRGBOLED* p, uint16_t x, uint16_t y, const char* format, ...);
 	int (*printfc)(pRGBOLED* p, uint16_t y, const char* format, ...);
+	int (*printfcp)(pRGBOLED* p, uint16_t x, uint16_t y, const char* format, ...);
 	int (*printfa)(pRGBOLED* p, const char* format, ...);
 } RGBOLED;
 

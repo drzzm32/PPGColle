@@ -1,6 +1,7 @@
 #include "./Include/mpu.h"
 
 #include <stdlib.h>
+#include <math.h>
 
 void _mpu_reset(pMPU* p) {
 	uint8_t buf[] = { 0xFF, 0xAA, 0x52 };
@@ -28,16 +29,22 @@ void _mpu_acc(pMPU* p, float* x, float* y, float* z) {
 		if (chksum != buf[ptr + MPU_PAKSIZ - 1]) return;
 
 		short tmp;
-		tmp = (buf[ptr + 3] << 8) | buf[ptr + 2];
-		*x = (float) tmp / 32768.0F * 2.0F * p->gravity;
-		tmp = (buf[ptr + 5] << 8) | buf[ptr + 4];
-		*y = (float) tmp / 32768.0F * 2.0F * p->gravity;
-		tmp = (buf[ptr + 7] << 8) | buf[ptr + 6];
-		*z = (float) tmp / 32768.0F * 2.0F * p->gravity;
+		tmp = (short) (buf[ptr + 3] << 8 | buf[ptr + 2]);
+		*x = tmp / 32768.0F * p->gravity;
+		tmp = (short) (buf[ptr + 5] << 8 | buf[ptr + 4]);
+		*y = tmp / 32768.0F * p->gravity;
+		tmp = (short) (buf[ptr + 7] << 8 | buf[ptr + 6]);
+		*z = tmp / 32768.0F * p->gravity;
 
-		tmp = (buf[ptr + 9] << 8) | buf[ptr + 8];
-		p->temper = (float) tmp / 340.0F + 36.53F;
+		tmp = (short) (buf[ptr + 9] << 8 | buf[ptr + 8]);
+		p->temper = tmp / 340.0F + 36.25F;
 	}
+}
+
+float _mpu_accsum(pMPU* p) {
+	float x, y, z;
+	_mpu_acc(p, &x, &y, &z);
+	return sqrt(x * x + y * y + z * z);
 }
 
 MPUnit* MPUInit(UART_HandleTypeDef* huart, float G) {
@@ -50,6 +57,7 @@ MPUnit* MPUInit(UART_HandleTypeDef* huart, float G) {
 
     c->reset = &_mpu_reset;
     c->acc = &_mpu_acc;
+    c->accsum = &_mpu_accsum;
 
     return c;
 }

@@ -612,6 +612,19 @@ int _rgb_printfc(pRGBOLED* p, uint16_t y, const char* format, ...) {
 	return result;
 }
 
+int _rgb_printfcp(pRGBOLED* p, uint16_t x, uint16_t y, const char* format, ...) {
+	char* iobuf = malloc(sizeof(char) * RGB_IOBUF_SIZE);
+	va_list args;
+	va_start(args, format);
+	int result = vsprintf(iobuf, format, args);
+	va_end(args);
+	x = x - (strlen(iobuf) * ((p->Font == RGBBig) ? 8 : 6)) / 2;
+	y = y - ((p->Font == RGBBig) ? 16 : 8);
+	_rgb_print(p, x, y, iobuf);
+	free(iobuf);
+	return result;
+}
+
 int _rgb_printfa(pRGBOLED* p, const char* format, ...) {
 	char* iobuf = malloc(sizeof(char) * RGB_IOBUF_SIZE);
 	va_list args;
@@ -619,6 +632,7 @@ int _rgb_printfa(pRGBOLED* p, const char* format, ...) {
 	int result = vsprintf(iobuf, format, args);
 	va_end(args);
 	_rgb_printa_(p, iobuf);
+	free(iobuf);
 	return result;
 }
 
@@ -675,6 +689,7 @@ RGBOLED* RGBOLEDInit(
 	c->print = &_rgb_print;
 	c->printf = &_rgb_printf;
 	c->printfc = &_rgb_printfc;
+	c->printfcp = &_rgb_printfcp;
 	c->printfa = &_rgb_printfa;
 	
 	return c;
@@ -738,6 +753,7 @@ RGBOLED* SoftRGBInit(
 	c->print = &_rgb_print;
 	c->printf = &_rgb_printf;
 	c->printfc = &_rgb_printfc;
+	c->printfcp = &_rgb_printfcp;
 	c->printfa = &_rgb_printfa;
 
 	return c;

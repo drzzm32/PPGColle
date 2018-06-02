@@ -6,6 +6,7 @@
 #include "conf.h"
 
 #include <setjmp.h>
+#include <string.h>
 
 #define OK 0
 #define ERR 1
@@ -15,6 +16,8 @@
 
 extern jmp_buf rstPos;
 extern UART_HandleTypeDef HUART;
+
+#define ASHL(array) memmove(array, array + 1, sizeof(array) - sizeof(array[0]))
 
 char* strlwr(char* s);
 

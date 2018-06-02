@@ -11,17 +11,21 @@
 
 typedef struct {
 	ADC_HandleTypeDef* adc;
+	GPIO_TypeDef*      CEPortGroup;
+	uint16_t           CEPortIndex;
 	float scale;
 	uint16_t buffer[8];
 } pBattery;
 
 typedef struct {
 	pBattery* p;
+	void (*charge)(pBattery* p, uint8_t state);
 	void (*refresh)(pBattery* p);
 	float (*voltage)(pBattery* p);
 } Battery;
 
-Battery* BatteryInit(ADC_HandleTypeDef* adc, float scale);
+Battery* BatteryInit(ADC_HandleTypeDef* adc, float scale,
+		GPIO_TypeDef* CEPortGroup, uint16_t CEPortIndex);
 
 
 #endif
