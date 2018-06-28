@@ -33,7 +33,7 @@ DataPack pack = {
 	.phone = 2,
 	.message = 5,
 	.weather = PPG_WEATHER_SUNNY,
-	.control = 0x80
+	.control = 0x81
 };
 
 uint8_t CTRL() { return pack.control & 0x01; }

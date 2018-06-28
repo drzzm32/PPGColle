@@ -44,13 +44,13 @@ void _ble_read(pBLE* p, char* data, size_t len) {
 
 void _ble_ppg(pBLE* p, int red, int ir) {
 	char txBuf[32];
-	sprintf(txBuf, "P%d,%d", red, ir);
+	sprintf(txBuf, "P%d,%d;", red, ir);
 	HAL_UART_Transmit(p->huart, (uint8_t*) txBuf, strlen(txBuf), 50);
 }
 
 void _ble_acc(pBLE* p, float acc) {
 	char txBuf[32];
-	sprintf(txBuf, "A%1.4f", acc);
+	sprintf(txBuf, "A%1.4f;", acc);
 	HAL_UART_Transmit(p->huart, (uint8_t*) txBuf, strlen(txBuf), 50);
 }
 
